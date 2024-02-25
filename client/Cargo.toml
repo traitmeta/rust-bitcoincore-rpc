@@ -1,6 +1,6 @@
 [package]
-name = "bitcoincore-rpc"
-version = "0.18.0"
+name = "brc20-bitcoincore-rpc"
+version = "0.18.2"
 authors = [
     "Steven Roose <steven@stevenroose.org>",
     "Jean Pierre Dudey <jeandudey@hotmail.com>",
@@ -19,10 +19,10 @@ name = "bitcoincore_rpc"
 path = "src/lib.rs"
 
 [dependencies]
-bitcoincore-rpc-json = { version = "0.18.0", path = "../json" }
+brc20-bitcoincore-rpc-json = { version = "0.18.1", path = "../json" }
 
 log = "0.4.5"
-jsonrpc = "0.14.0"
+jsonrpc = { version = "0.16.0", features = ["minreq_http"] }
 
 # Used for deserialization of JSON.
 serde = "1"
@@ -30,4 +30,3 @@ serde_json = "1"
 
 [dev-dependencies]
 tempfile = "3.3.0"
-
