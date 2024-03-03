@@ -12,11 +12,13 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::iter::FromIterator;
 use std::path::PathBuf;
+use std::time::Duration;
 use std::{fmt, result};
 
 use crate::{bitcoin, deserialize_hex};
 use bitcoin_private::hex::exts::DisplayHex;
 use jsonrpc;
+use jsonrpc::minreq_http::Builder;
 use serde;
 use serde_json;
 
@@ -674,6 +676,11 @@ pub trait RpcApi: Sized {
         self.call("importdescriptors", handle_defaults(&mut [json_request.into()], &[null()]))
     }
 
+    fn list_descriptors(&self, private: Option<bool>) -> Result<json::ListDescriptorsResult> {
+        let mut args = [opt_into_json(private)?];
+        self.call("listdescriptors", handle_defaults(&mut args, &[null()]))
+    }
+
     fn set_label(&self, address: &Address, label: &str) -> Result<()> {
         self.call("setlabel", &[address.to_string().into(), label.into()])
     }
@@ -1287,6 +1294,20 @@ impl Client {
                 client,
             })
             .map_err(|e| super::error::Error::JsonRpc(e.into()))
+    }
+
+    pub fn new_minreq_http(url: &str, auth: Auth) -> Result<Self> {
+        let (user, pass) = auth.get_user_pass()?;
+        let mut tp_builder = Builder::new().timeout(Duration::from_millis(10000)).url(url).unwrap();
+        if let Some(user) = user {
+            tp_builder = tp_builder.basic_auth(user, pass);
+        }
+        let tp = tp_builder.build();
+
+        let client = jsonrpc::client::Client::with_transport(tp);
+        Ok(Client {
+            client,
+        })
     }
 
     /// Create a new Client using the given [jsonrpc::Client].
